@@ -1,56 +1,89 @@
-import spotifyApi, { LOGIN_URL } from "@/lib/spotify";
 import NextAuth from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
+import fetch from "node-fetch";
+
+const scopes = [
+  "user-read-email",
+  "playlist-read-private",
+  "user-read-email",
+  "streaming",
+  "user-read-private",
+  "user-library-read",
+  "user-top-read",
+  "user-read-playback-state",
+  "user-modify-playback-state",
+  "user-read-currently-playing",
+  "user-read-recently-played",
+  "user-follow-read",
+].join(",");
+
+const params = {
+  scope: scopes,
+};
+
+const LOGIN_URL =
+  "https://accounts.spotify.com/authorize?" +
+  new URLSearchParams(params).toString();
 
 async function refreshAccessToken(token) {
-  try {
-    spotifyApi.setAccessToken(token.accessToken);
-    spotifyApi.setRefreshToken(token.refreshToken);
-
-    const { body: refreshedToken } = await spotifyApi.refreshAccessToken();
-  } catch (error) {
-    console.error(error);
-    return {
-      ...token,
-      error: "RefreshAccessToken",
-    };
-  }
+  const params = new URLSearchParams();
+  params.append("grant_type", "refresh_token");
+  params.append("refresh_token", token.refreshToken);
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      Authorization:
+        "Basic " +
+        new Buffer.from(
+          process.env.SPOTIFY_CLIENT_ID +
+            ":" +
+            process.env.SPOTIFY_CLIENT_SECRET
+        ).toString("base64"),
+    },
+    body: params,
+  });
+  const data = await response.json();
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token ?? token.refreshToken,
+    accessTokenExpires: Date.now() + data.expires_in * 1000,
+  };
 }
 
 export const authOptions = {
   // Configure one or more authentication providers
   providers: [
     SpotifyProvider({
-      clientId: process.env.NEXT_PUBLIC_CLIENT_ID,
-      clientSecret: process.env.NEXT_PUBLIC_CLIENT_SECRET,
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       authorization: LOGIN_URL,
     }),
-    // ...add more providers here
   ],
   secret: process.env.JWT_SECRET,
   pages: {
     signIn: "/login",
   },
-
   callbacks: {
-    async jwt({ token, account, user }) {
-      // initial sign in
-      if (account && user) {
-        return {
-          ...token,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          username: account.providerAccountId,
-          accessTokenExpires: account.expires_at * 1000,
-          // we are handling expiry times in
-          //    Milliseconds hence * 1000
-        };
-      }
-
-      if (Date.now() < token.accessTokenExpires) {
-        console.log("EXISTING ACCES TOKEN IS VALID");
+    async jwt({ token, account }) {
+      // Persist the OAuth access_token to the token right after signin
+      if (account) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.acessTokenExpires = account.expires_at;
         return token;
       }
+      //access token has not expired
+      if (Date.now() < token.accessTokenExpires * 1000) {
+        return token;
+      }
+
+      //access token has expired
+      return refreshAccessToken(token);
+    },
+    async session({ session, token, user }) {
+      // Send properties to the client, like an access_token from a provider.
+      session.accessToken = token.accessToken;
+      return session;
     },
   },
 };
