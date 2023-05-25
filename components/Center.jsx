@@ -1,4 +1,8 @@
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownCircleIcon,
+  ArrowLeftCircleIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { shuffle } from "lodash";
@@ -7,6 +11,8 @@ import { playlistIdState } from "@/atoms/playlistAtom";
 import { playlistState } from "@/atoms/playlistAtom";
 import useSpotify from "@/hook/useSpotify";
 import Songs from "./Songs";
+import { signOut } from "next-auth/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 const colors = [
   "from-indigo-500",
@@ -40,23 +46,43 @@ function Center() {
     }
   }, [spotifyApi, playlistId]);
 
-  console.log(playlist);
+  // console.log(playlist);
   return (
-    <div className="flex-grow h-screen overflow-y-scroll scrollbar-hide">
-      <header className="absolute top-5 right-8">
-        <div className="flex items-center space-x-3 opacity-90 hover:opacity-80 rounded-full p-1 pr-2 bg-black text-white" onClick={singOut}>
-          <img
-            src={session?.user.image}
-            alt="profile picture"
-            className="w-10 h-10 rounded-full"
-          />
-          <h2>{session?.user.name}</h2>
-          <ChevronDownIcon className="h-5 w-5" />
+    <div className="flex-grow h-screen overflow-y-scroll scrollbar-hide bg-[#121212] rounded-lg">
+      <header className="absolute top-5 right-8 z-10 w-[72%]">
+        <div className="flex justify-between">
+          <div className="flex space-x-3">
+            <div className="w-8 h-8 rounded-full bg-[#2A292A] flex justify-center">
+              <ChevronLeftIcon className="w-8 h-8 text-white p-1" />
+            </div>
+            <div className="w-8 h-8 rounded-full bg-[#2A292A] flex justify-center">
+              <ChevronRightIcon className="w-8 h-8 text-white p-1" />
+            </div>
+          </div>
+          <div className="flex space-x-3">
+            <div className="bg-white items-center justify-center rounded-3xl text-center flex font-bold px-2 text-sm">
+              <p className="">upgrade</p>
+            </div>
+            <div className=" text-white items-center justify-center rounded-3xl text-center flex bg-black opacity-70 px-2 text-sm">
+              <ArrowDownCircleIcon className="w-8 h-8" />
+              Install App
+            </div>
+            <div
+              onClick={() => signOut()}
+              className="opacity-90 hover:opacity-80 rounded-full bg-black"
+            >
+              <img
+                src={session?.user.image}
+                alt="profile picture"
+                className="w-10 h-10 rounded-full"
+              />
+            </div>
+          </div>
         </div>
       </header>
 
       <section
-        className={`flex items-end bo space-x-7 bg-gradient-to-b to-black ${color} h-80 text-white p-8`}
+        className={`flex items-end  space-x-7 bg-gradient-to-b to-black ${color} h-80 text-white p-8`}
       >
         <img
           className="h-44 w-44 shadow-2xl"
@@ -70,7 +96,7 @@ function Center() {
           </h1>
         </div>
       </section>
-      <div>
+      <div className=" bg-gradient-to-b from-black to-gray-900 h-full">
         <Songs />
       </div>
     </div>
