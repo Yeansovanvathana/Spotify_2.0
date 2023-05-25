@@ -15,5 +15,5 @@ pnpm dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 Result
-![Uploading Screenshot from 2023-05-25 17-15-13.png…]()
+![Screenshot from 2023-05-25 17-15-13](https://github.com/Yeansovanvathana/Spotify_2.0/assets/61142466/b1bbc3ad-046f-4c11-9364-92a27e164134)
 
