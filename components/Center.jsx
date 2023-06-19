@@ -46,10 +46,10 @@ function Center() {
     }
   }, [spotifyApi, playlistId]);
 
-  // console.log(playlist);
+  console.log(playlist);
   return (
     <div className="flex-grow h-screen overflow-y-scroll scrollbar-hide bg-[#121212] rounded-lg">
-      <header className="absolute top-5 right-8 z-10 w-[72%]">
+      <header className="hidden lg:inline absolute top-5 right-8 w-full z-10 pl-[25rem]">
         <div className="flex justify-between">
           <div className="flex space-x-3">
             <div className="w-8 h-8 rounded-full bg-[#2A292A] flex justify-center">
@@ -60,10 +60,10 @@ function Center() {
             </div>
           </div>
           <div className="flex space-x-3">
-            <div className="bg-white items-center justify-center rounded-3xl text-center flex font-bold px-2 text-sm">
+            <div className="bg-white items-center justify-center rounded-3xl text-center flex font-bold px-2 text-sm cursor-pointer">
               <p className="">upgrade</p>
             </div>
-            <div className=" text-white items-center justify-center rounded-3xl text-center flex bg-black opacity-70 px-2 text-sm">
+            <div className=" text-white items-center justify-center rounded-3xl text-center flex bg-black opacity-70 px-2 text-sm cursor-pointer">
               <ArrowDownCircleIcon className="w-8 h-8" />
               Install App
             </div>
